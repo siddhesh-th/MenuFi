@@ -1,22 +1,12 @@
 <?php
 	$conn = mysqli_connect("localhost","root", "", "menufi");
-	$start_date = date('Y-m-d');
-	$end_date = date('Y-m-d',strtotime(date('Y-m-d').'+1 day'));
-	//echo $start_date;
 	$s1 = "SELECT * 
-FROM opening_amount WHERE added_date BETWEEN '$start_date' AND '$end_date'
+FROM opening_amount
 ORDER BY opening_amount_id DESC
 LIMIT 1";
-//echo $s1;
 $res = $conn->query($s1);
-$amt = 0;
-if(mysqli_num_rows($res)>0){
-	$row = $res -> fetch_assoc();
-	$amt = $row['opening_amount'];
-}
-
-
-
+$row = $res -> fetch_assoc();
+$amt = $row['opening_amount'];
     $s = "SELECT * FROM menu";
     $r = $conn -> query($s);
     $categories = array();
@@ -36,36 +26,25 @@ if(mysqli_num_rows($res)>0){
         
         //$_SESSION['isredirect']=1;
         //header("Location: create_orderH?mobno=$mobno&address=$address&table=-1&CreateOrder=Create+Order");
-	}
-	$card = 0;
-	$online = 0;
-	$cash = 0;
+    }
 	// Pending Cash Order
-	$q = $this->db->query("SELECT order_status.Order_id as Order_id,sales.net_total as net_total from order_status ,sales where day(order_status.TIMESTAMP)= day(curdate()) and (order_status.status=3 or order_status.status=1) and sales.Order_id = order_status.Order_id")->result_array();
+	$q = $this->db->query("SELECT order_status.Order_id as Order_id,sales.net_total as net_total from order_status ,sales where day(order_status.TIMESTAMP)= day(curdate()) and order_status.status=3 and sales.Order_id = order_status.Order_id")->result_array();
 	$pendingOrders = $q;
 	
-	$sql3 = "SELECT * FROM payment_details WHERE payment_type ='Card' AND added_date BETWEEN '$start_date' AND '$end_date'";
+	$sql3 = "SELECT * FROM payment_details WHERE payment_type ='Card'";
 	$res = $conn -> query($sql3);
+	$card = 0;
+	$online = 0;
+	
+	
+	$sql4 = "SELECT * FROM payment_details WHERE payment_type ='Online'";
+	$re4 = $conn -> query($sql4);
+
 	if(mysqli_num_rows($res)>0){
 		while($rowcard = $res -> fetch_assoc()){
 			$card +=  $rowcard['total_amount'];
 		}
 	}
-	
-	
-	$sql5 = "SELECT * FROM payment_details WHERE payment_type ='Cash' AND added_date BETWEEN '$start_date' AND '$end_date'";
-	$rescash = $conn -> query($sql5);
-	if(mysqli_num_rows($rescash)>0){
-		while($rowcash = $rescash -> fetch_assoc()){
-			$cash +=  $rowcash['total_amount'];
-		}
-	}
-	
-	
-	$sql4 = "SELECT * FROM payment_details WHERE payment_type ='Online' AND added_date BETWEEN '$start_date' AND '$end_date'";
-	$re4 = $conn -> query($sql4);
-
-
 	
 	if(isset($re4)){
 		while($rowonline = $re4 -> fetch_assoc()){
@@ -181,37 +160,36 @@ if(mysqli_num_rows($res)>0){
 		 		<div class="col-md-2">
 		 			<input id="addOpeningAmt" type="button" name="addOpeningAmt" class="btn btn-success" value="ADD" onclick="addOpeningAmt()">
 		 		</div>
-		 		<div class="col-md-4 col-sm-offset-2">
+		 		<div class="col-md-6 col-sm-offset-2">
 		 			<p style="color:white;font-size:16px;">Total Opening Amount : <?php echo $amt; ?> </p>
-					 
-		 		</div>
-
-				 <div class="col-md-2 pull-left">
-		 			<p style="color:white;font-size:16px;">Total Card Sales : <?php echo $card; ?> </p>
-					 
 		 		</div>
 		 	</div>
 		 	<div class="col-lg-12">
 		 		
 		 		<div class="col-md-3 col-sm-offset-6">
-					 <p style="color:white;font-size:16px;">Total Cash Amount : <?php 
+					 <p style="color:white;font-size:16px;">Total Sales Amount : <?php 
+					 $net_total = 0;
+					 foreach($totalSaleOfDay as $sale)
+					 {
+						 $net_total +=(int) $sale->net_total;
+					 }
 					 
-					 echo $cash; ?> </p>
+					 echo $net_total; ?> </p>
 		 		</div>
 				 <div class="col-md-3 ">
-					 <p style="color:white;font-size:16px;">Total Online Sales : <?php 
+					 <p style="color:white;font-size:16px;">Total Card Sales : <?php 
 					 
 					 
-					 echo  $online; ?> </p>
+					 echo $card; ?> </p>
 		 		</div>
 		 	</div>
 		 	<div class="col-lg-12">
 		 		
 		 		<div class="col-md-3 col-sm-offset-6">
-		 			<p style="color:white;font-size:16px;">Total Drawer Amount : <?php echo $amt + $cash; ?></p>
+		 			<p style="color:white;font-size:16px;">Total Amount : <?php echo $amt + $net_total; ?></p>
 		 		</div>
 				 <div class="col-md-3">
-		 			<p style="color:white;font-size:16px;">Total Gross Sales : <?php echo $online + $cash + $card; ?></p>
+		 			<p style="color:white;font-size:16px;">Total Online Payments : <?php echo $online; ?></p>
 		 		</div>
 		 	</div>
 	 	</div>
@@ -223,18 +201,18 @@ if(mysqli_num_rows($res)>0){
 			<br>
             <div class="col-sm-12">
 
-            <a href="<?php echo base_url('index.php/Admin/DineIn'); ?>" style="font-size:15px;width:150px;text-align:center;margin-left:10px;margin-top:0px;" class="btn btn-info btn-lg">Dine In</a>
+            <a href="<?php echo base_url('index.php/Admin/DineIn'); ?>" style="font-size:15px;width:150px;text-align:center;margin-left:10px;margin-top:40px;" class="btn btn-info btn-lg">Dine In</a>
             </div>
             <br>
             <div class="col-sm-12">
 
-            <a href="<?php echo base_url('index.php/Admin/TakeAway'); ?>" style="font-size:15px;width:150px;text-align:center;margin-left:10px;margin-top:20px;" class="btn btn-info btn-lg">Take Away</a>
+            <a href="<?php echo base_url('index.php/Admin/TakeAway'); ?>" style="font-size:15px;width:150px;text-align:center;margin-left:10px;margin-top:40px;" class="btn btn-info btn-lg">Take Away</a>
             </div>
 			<br>
 
             <div class="col-sm-12">
 
-            <a href="<?php echo base_url('index.php/Admin/HomeDelivery'); ?>" style="font-size:15px;width:150px;text-align:center;margin-left:10px;margin-top:20px;" class="btn btn-info btn-lg">Home Delivery</a>
+            <a href="<?php echo base_url('index.php/Admin/HomeDelivery'); ?>" style="font-size:15px;width:150px;text-align:center;margin-left:10px;margin-top:40px;" class="btn btn-info btn-lg">Home Delivery</a>
             </div>
                                         </div>
 			<?php } ?>
@@ -247,7 +225,7 @@ if(mysqli_num_rows($res)>0){
 									 } ?> 
 								
 								">
-									
+									<h1 class="page-header">Manual Order</h1>
 									<div class="form-body">
 										<!-- JAVASCRIPT ADD ITEM TO ORDER CONTENT WILL BE HERE -->
 										<?php if(!(isset($_SESSION['order_id']))){ ?>
@@ -268,7 +246,9 @@ if(mysqli_num_rows($res)>0){
 											</form>
 										</div>
 										<div class="row">
-                
+                <div class="col-lg-12">
+                    <h1 class="page-header">Update Cash Orders</h1>
+                </div>
                 <!-- /.col-lg-12 -->
             </div>
             <!-- /.row -->
@@ -279,24 +259,12 @@ if(mysqli_num_rows($res)>0){
            
             <div class="row" id="div_offlineOrders">
                 <?php if(!empty($pendingOrders)){
-					//print_r($pendingOrders);
                                      foreach ($pendingOrders as $value) {
 //    echo '<option value="'.$value["id"].'">'.$value['Order_id'].'</option>';
-                                     
-						$idr = $value['Order_id'];
-						$sss = "SELECT * FROM orders WHERE Order_id='$idr'";
-						$re1 = $conn ->query($sss);
-						$rew = $re1 -> fetch_assoc();
-						if($rew['Table_id'] == '-1'){
-							$table_no = 'Home Delivery';
-						}else if($rew['Table_id'] == '99'){
-							$table_no = 'Take Away';
-						}else{
-							$table_no = "Table No: ".$rew['Table_id'];
-						}
+                                        
+                        $idr = $value['Order_id'];
                         $sq3 = "SELECT * FROM customer_order WHERE Order_id='$idr'";
-						$ress = $conn -> query($sq3);
-						
+                        $ress = $conn -> query($sq3);
                         // print_r($ress);
                         if(mysqli_num_rows($ress) == 0 ){
                             continue;
@@ -311,9 +279,7 @@ if(mysqli_num_rows($res)>0){
                                     <span id="printspan<?php echo $value['Order_id']; ?>">
 									<i class="fa fa-times fa-2x pull-right" onclick="deleteOrderPayment(<?php echo $value['Order_id']; ?>)" aria-hidden="true"></i>
                                     <h3 class="text-center">Order No.<?php echo $value['Order_id']; ?></h3>
-									<p style="font-size:20px" class="text-center"><?php echo $table_no; ?></p>
-                                    <?php while($raw = $ress -> fetch_assoc()){
-										$cust_id = $raw['customer_id']; ?>
+                                    <?php while($raw = $ress -> fetch_assoc()){ ?>
                     <p><strong ><?php 
                         //print_r($raw);
                         $q = $raw['Quantity'];
@@ -325,22 +291,7 @@ if(mysqli_num_rows($res)>0){
                             $sq4 = "SELECT * FROM menu WHERE Menu_Id='$mid'";
                             $ra = $conn -> query($sq4);
                             $rs = $ra -> fetch_assoc();    
-							echo $rs['Name'].": ".($q*$rs['Price']); 
-							if($table_no == 'Home Delivery'){
-								$cid = $raw['customer_id'];
-                            $sq5 = "SELECT * FROM customers WHERE customer_id='$cid'";
-                            $rr = $conn -> query($sq5);
-                            $rf = $rr -> fetch_assoc();
-                            $mob = $rf['mobile'];
-                            $sq6 = "SELECT * FROM addresses WHERE mobile='$mob'";
-                            $rg = $conn -> query($sq6);
-                            $rk = $rg -> fetch_assoc();
-                            $add = $rk['address'];
-							$name = $rk['name'];
-
-								
-							}
-							
+                            echo $rs['Name'].": ".($q*$rs['Price']); 
                             ?>
 								<i class="fa fa-times  fa-1x" style='color:red' onclick="deleteOrderItem(<?php echo $raw['id']; ?>)" aria-hidden="true"></i>
                 </p>								
@@ -360,16 +311,9 @@ if(mysqli_num_rows($res)>0){
                                         }
                                     
                                     ?>
-                                                                                <a style="margin-left:20px;" href="<?php echo base_url(); ?>index.php/Admin/searchD?oid=<?php echo $idr."&"; ?>customer_id=<?php echo $cust_id; ?>"  class="btn btn-info">Add</a>
-
+                                        
                                         
                                 </h4>
-								<?php if($table_no == 'Home Delivery'){ ?>
-								<p><strong>Name:</strong> <?php if(isset($name)){echo $name;} ?><br><br>
-                        <strong>Address:</strong> <?php if(isset($add)){echo $add;} ?>
-								<?php } ?>
-                    </p>
-
                                     </span>
                                     <?php
                                         if(!$r2['coupon_apply']){
@@ -383,14 +327,7 @@ if(mysqli_num_rows($res)>0){
                                     ?>
                                     <div>
                                         <br>
-                                        <input type="submit" value="Pay" class="btn btn-success form-control" 
-										<?php if($table_no == 'Home Delivery'){ ?>
-											onclick="showModal('<?php echo $idr; ?>','<?php echo $table_no ?>');print_home('<?php echo $idr; ?>','<?php if(isset($add)){echo $add;}?>','<?php if(isset($name)){echo $name;} ?>');"
-										<?php }else{ ?>
-										onclick="showModal('<?php echo $idr; ?>','<?php echo $table_no ?>');" 
-										
-										<?php } ?>
-										>
+                                        <input type="submit" value="Pay" class="btn btn-success form-control" onclick="showModal('<?php echo $idr; ?>');" >
                                     </div>
                                 </div>
                             </div>
@@ -433,7 +370,6 @@ if(mysqli_num_rows($res)>0){
 													<th>Addon</th>
 													<th>Addons Added</th>
 													<th>Batter</th>
-                                                    <th>Price</th>
 													<th>Add Item</th>
 												</tr>
 												<?php 
@@ -502,9 +438,6 @@ if(mysqli_num_rows($res)>0){
 															
 
 														</td>
-                                                        <td>
-                                                                    <?php echo $value['Price']; ?>
-                                                        </td>
 														<td>
 															<input type="submit" name='add' value="Add Item" class="btn btn-primary">
 														</td>
@@ -542,8 +475,6 @@ if(mysqli_num_rows($res)>0){
 																			<th class="col-md-4">Quantity</th>
 																			<th> Addons </th>
 																			<th> Batter </th>
-                                                                         
-
 																		</tr>
 																		<?php 
                                                 if(isset($fake) && !empty($fake)){
@@ -598,9 +529,6 @@ if(mysqli_num_rows($res)>0){
 																				}
 																			?>
 																			</td>
-                                                                            <td>
-                                                                                <?php echo $ra['Price']; ?>
-                                                                            </td>
 																		</tr>
 																		<?php }
                                                 }else{
@@ -608,7 +536,7 @@ if(mysqli_num_rows($res)>0){
                                                 }?>
 
 																	</table>
-																	<button type="submit" onclick="kotprint(<?php echo $_SESSION['order_id']; ?>)" name="place_order" class="form-control btn btn-success">Place Order</button>
+																	<button type="submit" name="place_order" class="form-control btn btn-success">Place Order</button>
 																</form>
 															</div>
 														</div>
@@ -620,16 +548,15 @@ if(mysqli_num_rows($res)>0){
                                            
 											<div class="col-lg-12">
 												<div>
-													
-													
+													<h4 style="color:white;">
+														<?php $oid=$_SESSION['order_id']; echo "Order No.:".$oid;?>
+													</h4>
+													<h4 style="color: white"> Search Menu Item</h4>
 													<form method="post" action="searchD">
-                                                    <div class="col-sm-7">
-                                                    <input name="search" placeholder="search menu item"  class="form-control" id="search">
+														<input name="search"  class="form-control" id="search">
 														<br>
 														<input type="submit" id="sch_btn" value="Search" class="form-control" />
-                                                    </div>
-														
-														<div class="col-sm-5"  style="padding:0px;margin-left:0px;margin-top:-10px;">
+														<div  style="padding:5px;margin-left:0px;">
 															<input style="margin-top:5px;margin-right:5px; width:140px;height:50px;" type="button" value="Show All" onclick="filter('')" class="btn btn-primary">
 															<?php foreach($categories as $category){ ?>
 															<input style="margin-top:5px;margin-right:5px; width:140px;height:50px;" type="button" value="<?php echo $category; ?>" onclick="filter('<?php echo $category ?>')"
@@ -710,7 +637,7 @@ if(mysqli_num_rows($res)>0){
 					</div>
 					<div class="modal-footer">
 						<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-						<button type="button" id="subp" class="btn btn-primary" >Submit</button>
+						<button type="button" class="btn btn-primary" onclick="call()" >Submit</button>
 					</div>
 				</form>	
 			</div>
@@ -800,35 +727,6 @@ function deleteOrderPayment(id){
 
 }
 
-function kotprint(id){
-  //  alert('print kot');
-
-	             var printWindow = window.open('', '', 'height=300,width=600');
-
-    //             printWindow.document.write(`<html><head><style>@page {
-    //                 size: 3in 3.6in;
-    // margin: 30%
-    // }
-    // </style><title></title>`);
-    //             printWindow.document.write('</head><body style="height:100px;width:300px;">');
-    //             printWindow.document.write(divContents);
-    //             printWindow.document.write('</body></html>');
-    //             printWindow.document.close();
-             $.ajax({
-                type: 'GET',
-                url: '<?php echo base_url(); ?>index.php/Admin/printkot',
-                data : {
-                    'id':id
-                },
-                cache:false,
-                dataType:'html',
-                success: function(resp){
-                    printWindow.document.write(resp);
-                    printWindow.print();
-            }
-            });
-}
-
 function getOfflineOrders(){
             $.ajax({
                 type: 'POST',
@@ -868,138 +766,13 @@ function getOfflineOrders(){
 
         }
 
-        function showModal(id,table){
-    $('#modal_oid').val(id);
-   // $('#modal_table').val(table);
-   if(table=='Home Delivery'){
-    document.getElementById("subp").addEventListener("click", call_home);
-   }else{
-    document.getElementById("subp").addEventListener("click", call);
-
-   }
-    $('#addPaymentModal').modal('show');
-    $('#given_amount').val('');
-    $('#return_amount').val('');
-    console.log(id);
-}
-
-        function showModal_Home(id){
+        function showModal(id){
     $('#modal_oid').val(id);
     $('#addPaymentModal').modal('show');
     $('#given_amount').val('');
     $('#return_amount').val('');
     console.log(id);
 }
-
-function print_home(id,address,name){
-           // var divContents = $("#printspan"+id).html();
-               var printWindow = window.open('', '', 'height=300,width=600');
-    //             printWindow.document.write(`<html><head><style>@page {
-    //                 size: 3in 3.6in;
-    // margin: 30%
-    // }
-    // </style><title></title>`);
-    //             printWindow.document.write('</head><body style="height:100px;width:300px;">');
-    //             printWindow.document.write(divContents);
-    //             printWindow.document.write('</body></html>');
-    //             printWindow.document.close();
-             $.ajax({
-                type: 'GET',
-                url: '<?php echo base_url(); ?>index.php/Admin/printafterOrderD',
-                data : {
-                    'Order_id':id,
-                    'name': name,
-                    'address': address
-                },
-                cache:false,
-                dataType:'html',
-                success: function(resp){
-                    printWindow.document.write(resp);
-                    printWindow.print();
-
-            }
-            });
-          
-        }
-
-		function call_home(){
-    let gamt = 0;
-    let ramt = 0;
-    id = $('#modal_oid').val();
-    if($('#given_amount').val()!=''){
-        gamt = $('#given_amount').val();    
-    }
-    if($('#return_amount').val()!=''){
-        ramt = $('#return_amount').val();    
-    }
-
-    $.ajax({
-                type: 'GET',
-                url: 'ajax_payitaway',
-                data:{
-                    'id':id,
-                    'type': $('#payment_type').val(),
-                    'given_amt':gamt,
-                    'return_amt': ramt
-                },
-                cache:false,
-                
-                success: function(resp){
-                    //console.log(resp);
-                    if(resp == 'success'){
-                       //sendDelivery(id);
-                      pay_it(id);
-                      window.location = '';
-
-                    }
-
-            }
-        });
-    
-    
-}
-
-function sendDelivery(id){
-    $.ajax({
-            type: "GET",
-            contentType: "application/json; charset=utf-8",
-            url: "ajax_Deliver",
-            data: {
-                'id':id
-            },
-            success: function (result) {
-                if(result == 'success'){
-                    window.location = '';
-                }
-            }
-        });
-}
-
-		function addOpeningAmt(){
-			var opening_amount = $('#opening_amount').val();
-			if(opening_amount !=""){
-				$.ajax({
-					type: 'GET',
-					dataType: "json",
-					url: '<?php echo base_url(); ?>index.php/Admin/addOpeningAmt',
-					data:{
-						'opening_amount':opening_amount
-					},
-					//cache:false,
-					success: function(resp){
-						if(resp==1){
-							alert('Opening amount added successfully!');
-							location.reload();
-						}else{
-							alert('Opening amount not added!');
-						}	
-					}
-
-				});
-			}			
-			
-		} 
-
 
 function getReturnAmount(){
 	given = $('#given_amount').val();

@@ -30,6 +30,7 @@
     "November" => 0,
     "December" => 0,
   );
+
   $customers = array(
     "January" => 0,
     "February" => 0,
@@ -43,21 +44,6 @@
     "October" => 0,
     "November" => 0,
     "December" => 0,
-  );
-
-  $orders = array(
-    "January" => array("Card"=>0,"Cash"=>0,"Online"=>0),
-    "February" => array("Card"=>0,"Cash"=>0,"Online"=>0),
-    "March" => array("Card"=>0,"Cash"=>0,"Online"=>0),
-    "April" => array("Card"=>0,"Cash"=>0,"Online"=>0),
-    "May" => array("Card"=>0,"Cash"=>0,"Online"=>0),
-    "June" => array("Card"=>0,"Cash"=>0,"Online"=>0),
-    "July" => array("Card"=>0,"Cash"=>0,"Online"=>0),
-    "August" => array("Card"=>0,"Cash"=>0,"Online"=>0),
-    "September" => array("Card"=>0,"Cash"=>0,"Online"=>0),
-    "October" => array("Card"=>0,"Cash"=>0,"Online"=>0),
-    "November" => array("Card"=>0,"Cash"=>0,"Online"=>0),
-    "December" => array("Card"=>0,"Cash"=>0,"Online"=>0),
   );
 
   $sql = "SELECT * FROM customers";
@@ -81,22 +67,6 @@
     }
     
   }
-
-  $sql = "SELECT * FROM payment_details";
-  $res = $conn -> query($sql);
-  if($res){
-    while($row = $res -> fetch_assoc()){
-      $ro = $row['added_date']; 
-        $type = $row['payment_type'];
-      $month = date('F', strtotime($ro));
-      $orders[$month][$type] += 1;
-    }
-    
-  }
-
-  //print_r($orders);
-
-
   $sql = "SELECT * FROM ingredients";
   $res = $conn -> query($sql);
   $expenses = 0;
@@ -208,7 +178,13 @@
            		 			<div class="panel-heading">Gross Sale</div>
            		 			<div class="panel-body"> 
            		 				<canvas id="rest_grossSalesReport" ></canvas>
-           		 			</div>	  
+           		 			</div>	
+           		 		</div>
+                    <div class="panel panel-info">
+                    <div class="panel-heading">Net Sale</div>
+                    <div class="panel-body"> 
+                      <canvas id="rest_netSalesReport" ></canvas>
+                    </div>  
                   </div>
                   
            		 		
@@ -224,12 +200,12 @@
    
       
    <tr><th>Months</th>
-    <th>Card Sales</th>   <th>Cash Sales</th><th>Online Sales</th></tr>
+    <th>Gross Sale</th>   <th>Net Sale</th></tr>
       <!-- <tr><td>January</td><td>45</td><td>35</td></tr>       -->
       <?php 
-        foreach($orders as $k => $v){
+        foreach($gross_profit as $k => $v){
       ?>
-      <tr><td><?php echo $k; ?></td><td><?php echo $v['Card'] ?></td><td><?php echo $v['Cash'] ?></td><td><?php echo $v['Online'] ?></td></tr>
+      <tr><td><?php echo $k; ?></td><td><?php echo(int)($v); ?></td><td><?php echo $net_profit[$k]; ?></td></tr>
     <?php 
         }
     ?>
