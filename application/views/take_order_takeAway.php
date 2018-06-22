@@ -181,7 +181,7 @@ if(mysqli_num_rows($res)>0){
                 <div class="col-md-2">
                     <input id="addOpeningAmt" type="button" name="addOpeningAmt" class="btn btn-success" value="ADD" onclick="addOpeningAmt()">
                 </div>
-                <div class="col-md-4 col-sm-offset-2">
+                <div class="col-md-3 col-sm-offset-2">
                     <p style="color:white;font-size:16px;">Total Opening Amount : <?php echo $amt; ?> </p>
                      
                 </div>
