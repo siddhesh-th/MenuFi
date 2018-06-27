@@ -327,21 +327,21 @@ where mir.addons=1")->result_array();
     }
 
     public function sales_accReports(){
-        $res['ing'] = $this->db->query("select * from ingredients")->result_array(); 
-		$res['menu'] = $this->db->query("select * from menu")->result_array();
-		$res['batters'] = $this->db->query("select * from batter")->result_array();
+  //       $res['ing'] = $this->db->query("select * from ingredients")->result_array(); 
+		// $res['menu'] = $this->db->query("select * from menu")->result_array();
+		// $res['batters'] = $this->db->query("select * from batter")->result_array();
 		
-		$res['mapped_ing']=$this->db->query("select mir.id,m.Menu_Id,m.Name, i.Ingredients_id,i.Name as ing_name,mir.quantity_rel,mir.addons from
-		menu m join menu_ingridient_rel mir on (m.Menu_Id = mir.Menu_id)
-		join ingredients i on (mir.Ingredients_id = i.Ingredients_id)
-		where mir.addons!=1")->result_array();
+		// $res['mapped_ing']=$this->db->query("select mir.id,m.Menu_Id,m.Name, i.Ingredients_id,i.Name as ing_name,mir.quantity_rel,mir.addons from
+		// menu m join menu_ingridient_rel mir on (m.Menu_Id = mir.Menu_id)
+		// join ingredients i on (mir.Ingredients_id = i.Ingredients_id)
+		// where mir.addons!=1")->result_array();
 		
-		$res['mapped_addons']=$this->db->query("select mir.id,m.Menu_Id,m.Name, i.Ingredients_id,i.Name as ing_name,mir.quantity_rel,mir.addons from
-		menu m join menu_ingridient_rel mir on (m.Menu_Id = mir.Menu_id)
-		join ingredients i on (mir.Ingredients_id = i.Ingredients_id)
-		where mir.addons=1")->result_array();
-		$this->load->view("sales_accReports",$res);
-		$this->load->view('footer');
+		// $res['mapped_addons']=$this->db->query("select mir.id,m.Menu_Id,m.Name, i.Ingredients_id,i.Name as ing_name,mir.quantity_rel,mir.addons from
+		// menu m join menu_ingridient_rel mir on (m.Menu_Id = mir.Menu_id)
+		// join ingredients i on (mir.Ingredients_id = i.Ingredients_id)
+		// where mir.addons=1")->result_array();
+		 $this->load->view("sales_accReports");
+		 $this->load->view('footer');
 
 	}
 	 public function saleexe_report_export()
@@ -1440,83 +1440,109 @@ if(!isset($_SESSION['admin_id']))
 
 
       }
+      public function sr_weekly(){
+        // sr = sales report
+        $this->load->model('Admin_model');
+        $data['salesByWeek'] = $this->Admin_model->salesByWeek();
+        $this->load->view("sr_weekly",$data);
+    $this->load->view('footer');
+    }
       public function sales_daily_reports()
       {
-        $hour_arr = array(
-                '1'=>array('start'=>'09','end'=>'10','hour'=>'09-10 AM'),
-                '2'=>array('start'=>'10','end'=>'11','hour'=>'10-11 AM'),
-                '3'=>array('start'=>'11','end'=>'12','hour'=>'11-12 PM'),
-                '4'=>array('start'=>'12','end'=>'13','hour'=>'12-01 PM'),
-                '5'=>array('start'=>'13','end'=>'14','hour'=>'01-02 PM'),
-                '6'=>array('start'=>'14','end'=>'15','hour'=>'02-03 PM'),
-                '7'=>array('start'=>'15','end'=>'16','hour'=>'03-04 PM'),
-                '8'=>array('start'=>'16','end'=>'17','hour'=>'04-05 PM'),
-                '9'=>array('start'=>'17','end'=>'18','hour'=>'05-06 PM'),
-                '10'=>array('start'=>'18','end'=>'19','hour'=>'06-07 PM'),
-                '11'=>array('start'=>'19','end'=>'20','hour'=>'07-08 PM'),
-                '12'=>array('start'=>'20','end'=>'21','hour'=>'08-09 PM'),
-                '13'=>array('start'=>'21','end'=>'22','hour'=>'09-10 PM'),
-                '14'=>array('start'=>'22','end'=>'23','hour'=>'10-11 PM'),
-                '15'=>array('start'=>'23','end'=>'00','hour'=>'11-12 PM'),
-                '16'=>array('start'=>'00','end'=>'01','hour'=>'12-01 PM'),
-        );
-  
-        $data_arr = array();
-        if(isset($_POST['date_dt']) && $_POST['date_dt']!=''){
-          $today_date = date('Y-m-d', strtotime($_POST['date_dt']));
-        }else{
-          $today_date = date('Y-m-d');
-        }
-        
-        $last_total = '0';
-        $final_avg_sales_total = 0;
-        $final_total = 0;
-        foreach($hour_arr as $key=> $hr ){
-          $start = $hr['start'];
-          $end   = $hr['end'];
-          if($key=='15'){
-            $start_date=$today_date;
-            $end_date=date('Y-m-d', strtotime("+1 day", strtotime($today_date)));
-          }else if($key=='16'){
-            $start_date=date('Y-m-d', strtotime("+1 day", strtotime($today_date)));
-            $end_date=date('Y-m-d', strtotime("+1 day", strtotime($today_date)));
-          }else{
-            $start_date=$today_date;
-            $end_date=$today_date;
-          }
-          
+ {
+         $hour_arr = array(
+                 '1'=>array('start'=>'09','end'=>'10','hour'=>'09-10 AM'),
+                 '2'=>array('start'=>'10','end'=>'11','hour'=>'10-11 AM'),
+                 '3'=>array('start'=>'11','end'=>'12','hour'=>'11-12 PM'),
+                 '4'=>array('start'=>'12','end'=>'13','hour'=>'12-01 PM'),
+                 '5'=>array('start'=>'13','end'=>'14','hour'=>'01-02 PM'),
+                 '6'=>array('start'=>'14','end'=>'15','hour'=>'02-03 PM'),
+                 '7'=>array('start'=>'15','end'=>'16','hour'=>'03-04 PM'),
+                 '8'=>array('start'=>'16','end'=>'17','hour'=>'04-05 PM'),
+                 '9'=>array('start'=>'17','end'=>'18','hour'=>'05-06 PM'),
+                 '10'=>array('start'=>'18','end'=>'19','hour'=>'06-07 PM'),
+                 '11'=>array('start'=>'19','end'=>'20','hour'=>'07-08 PM'),
+                 '12'=>array('start'=>'20','end'=>'21','hour'=>'08-09 PM'),
+                 '13'=>array('start'=>'21','end'=>'22','hour'=>'09-10 PM'),
+                 '14'=>array('start'=>'22','end'=>'23','hour'=>'10-11 PM'),
+                 '15'=>array('start'=>'23','end'=>'00','hour'=>'11-12 PM'),
+                 '16'=>array('start'=>'00','end'=>'01','hour'=>'12-01 PM'),
+         );
+   
+         $data_arr = array();
+         if(isset($_POST['date_dt']) && $_POST['date_dt']!=''){
+           $today_date = date('Y-m-d', strtotime($_POST['date_dt']));
+         }else{
+           $today_date = date('Y-m-d');
+         }
+         
+         $last_total = '0';
+         $final_avg_sales_total = 0;
+         $final_total = 0;
+         foreach($hour_arr as $key=> $hr ){
+           $start = $hr['start'];
+           $end   = $hr['end'];
+           if($key=='15'){
+             $start_date=$today_date;
+             $end_date=date('Y-m-d', strtotime("+1 day", strtotime($today_date)));
+           }else if($key=='16'){
+             $start_date=date('Y-m-d', strtotime("+1 day", strtotime($today_date)));
+             $end_date=date('Y-m-d', strtotime("+1 day", strtotime($today_date)));
+           }else{
+             $start_date=$today_date;
+             $end_date=$today_date;
+           }
+          $start_date=str_replace("-",",",$start_date);
+          $end_date=str_replace("-",",",$end_date);
+           
           $q = "SELECT count(pd.payment_details_id) AS count,SUM(pd.total_amount) AS total_sales FROM payment_details pd WHERE pd.added_date>=str_to_date(concat('".$start_date."',' ".$start."'),'%Y-%m-%d %H') AND pd.added_date<=str_to_date(concat('".$end_date."',' ".$end."'),'%Y-%m-%d %H')";
          // echo $q;
-          $query = $this->db->query($q);
-            //print_r($this->db->error());
-          $result = $query->row_array();
-   
-          $data_arr[$key]['hour'] = $hr['hour'];
-          $data_arr[$key]['total_customer'] = $result['count'];
-          $data_arr[$key]['sales_hour'] = round($result['total_sales'],2);
-  
-          if($result['count']>0){
-            $avg_sales_hour = round($result['total_sales'], 2) / $result['count'];
-            $data_arr[$key]['avg_sales_hour'] = round($avg_sales_hour,2);
-          } else{
-            $avg_sales_hour = 0;
-            $data_arr[$key]['avg_sales_hour'] = '0';
-          }
+          $concat1=$start_date.' '.$start.',00,00';
+          $concat2=$end_date.' '.$end.',00,00';
           
-          $data_arr[$key]['total_sales'] = round($result['total_sales'], 2) + $last_total;
-          $last_total = round($result['total_sales'], 2) + $last_total;
-  
-          $final_avg_sales_total += $avg_sales_hour;
-          $final_total += round($result['total_sales'],2);
-        }
+          $yr=2018;$day=25;$month=05;
+          // echo $concat1;
+         // $begin=str_to_date( concat(' ".$start_date." ',' ".$start."'), '%d-%b-%Y %H');
+         // $end=str_to_date(concat('".$end_date."',' ".$end."'),'%Y-%m-%d %H');
+        //    echo $begin;
+          $q = "SELECT count(payment_details_id) AS count,SUM(total_amount) AS total_sales FROM payment_details WHERE added_date >= STR_TO_DATE('".$concat1."', '%Y,%m,%d %H,%i,%s') AND added_date <= STR_TO_DATE('".$concat2."', '%Y,%m,%d %H,%i,%s')";
+
+    
+           $query = $this->db->query($q);
+            //print_r($this->db->error());
+           $result = $query->row_array();
+   
+
         
-        $data['date'] = date('d-m-Y', strtotime($today_date));
-        $data['report_data'] = $data_arr;
-        $data['final_avg_sales_total'] = round($final_avg_sales_total,2);
-        $data['final_total'] = $final_total;
+           $data_arr[$key]['hour'] = $hr['hour'];
+           $data_arr[$key]['total_customer'] = $result['count'];
+           $data_arr[$key]['sales_hour'] = round($result['total_sales'],2);
+   
+           if($result['count']>0){
+             $avg_sales_hour = round($result['total_sales'], 2) / $result['count'];
+             $data_arr[$key]['avg_sales_hour'] = round($avg_sales_hour,2);
+           } else{
+             $avg_sales_hour = 0;
+             $data_arr[$key]['avg_sales_hour'] = '0';
+           }
+           
+           $data_arr[$key]['total_sales'] = round($result['total_sales'], 2) + $last_total;
+           $last_total = round($result['total_sales'], 2) + $last_total;
+   
+           $final_avg_sales_total += $avg_sales_hour;
+           $final_total += round($result['total_sales'],2);
+          //echo $q."<br>";
+         }
+         
+         $data['date'] = date('d-m-Y', strtotime($today_date));
+         $data['report_data'] = $data_arr;
+         $data['final_avg_sales_total'] = round($final_avg_sales_total,2);
+         $data['final_total'] = $final_total;
   
-        $response = $this->load->view("sales_daily_reports",$data);
-      }
+      
+         $response = $this->load->view("sales_daily_reports",$data);
+       }
+     }
 
       public function printafterOrderD(){
         $Order_id = $_GET['Order_id'];
