@@ -388,7 +388,7 @@ where mir.addons=1")->result_array();
         $this->load->view("sr_quarterly",$data);
 		$this->load->view('footer');
     }
-    
+  */  
     public function v_sr_monthly(){
         // sr = sales report
         $this->load->model('Admin_model');
@@ -396,7 +396,7 @@ where mir.addons=1")->result_array();
         $this->load->view("sr_monthly",$data);
 		$this->load->view('footer');
     }
-    
+    /*
     public function v_sr_weekly(){
         // sr = sales report
         $this->load->model('Admin_model');
